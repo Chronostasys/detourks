@@ -7,6 +7,9 @@
 int main()
 {
     MessageBoxA(NULL, "HI", "HI", NULL);
+    HKEY c;
+    RegOpenKeyEx(HKEY_CURRENT_USER, NULL, 0, KEY_READ,&c);
+    MessageBoxA(NULL, "HI", "HI", NULL);
     //HeapCreate("", 1000, 10000);
     std::cout << "Hello World!\n";
 }
