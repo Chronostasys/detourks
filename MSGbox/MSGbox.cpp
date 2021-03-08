@@ -7,6 +7,7 @@
 int main()
 {
     MessageBoxA(NULL, "HI", "HI", NULL);
+    //HeapCreate("", 1000, 10000);
     std::cout << "Hello World!\n";
 }
 

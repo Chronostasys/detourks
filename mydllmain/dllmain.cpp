@@ -8,14 +8,50 @@
 
 
 SYSTEMTIME st;
-
-static int (WINAPI* OldMessageBoxW)(_In_opt_ HWND hWnd, _In_opt_ LPCWSTR lpText, _In_opt_ LPCWSTR lpCaption, _In_ UINT uType) = MessageBoxW;
-static int (WINAPI* OldMessageBoxA)(_In_opt_ HWND hWnd, _In_opt_ LPCSTR lpText, _In_opt_ LPCSTR lpCaption, _In_ UINT uType) = MessageBoxA;
-
 void dllLog() {
     GetLocalTime(&st);
     printf("DLL LOGS: %d-%d-%d %02d: %02d: %02d: %03d\n", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
 }
+
+LONG(WINAPI* OldRegCreateKeyExA)(HKEY a0,
+    LPCSTR a1,
+    DWORD a2,
+    LPSTR a3,
+    DWORD a4,
+    REGSAM a5,
+    LPSECURITY_ATTRIBUTES a6,
+    PHKEY a7,
+    LPDWORD a8)
+    = RegCreateKeyExA;
+
+
+extern "C" __declspec(dllexport) LONG WINAPI NewRegCreateKeyExA(HKEY a0,
+    LPCSTR a1,
+    DWORD a2,
+    LPSTR a3,
+    DWORD a4,
+    REGSAM a5,
+    LPSECURITY_ATTRIBUTES a6,
+    PHKEY a7,
+    LPDWORD a8)
+{
+    printf("\n\n**************************************\n");
+    printf("RegCreateKeyA Hooked\n");
+    dllLog();
+    printf("****************************************\n\n");
+    return OldRegCreateKeyExA(a0, a1, a2, a3, a4, a5, a6, a7, a8);
+}
+
+
+
+
+
+
+
+static int (WINAPI* OldMessageBoxW)(_In_opt_ HWND hWnd, _In_opt_ LPCWSTR lpText, _In_opt_ LPCWSTR lpCaption, _In_ UINT uType) = MessageBoxW;
+static int (WINAPI* OldMessageBoxA)(_In_opt_ HWND hWnd, _In_opt_ LPCSTR lpText, _In_opt_ LPCSTR lpCaption, _In_ UINT uType) = MessageBoxA;
+
+
 
 extern "C" __declspec(dllexport) int WINAPI NewMessageBoxA(_In_opt_ HWND hWnd, _In_opt_ LPCSTR lpText, _In_opt_ LPCSTR lpCaption, _In_ UINT uType)
 {
@@ -124,6 +160,7 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved
         DetourAttach(&(PVOID&)OldCreateFile, NewCreateFile);
         DetourAttach(&(PVOID&)OldHeapCreate, NewHeapCreate);
         DetourAttach(&(PVOID&)OldHeapDestroy, NewHeapDestroy);
+        DetourAttach(&(PVOID&)OldRegCreateKeyExA, NewRegCreateKeyExA);
         DetourTransactionCommit();
     }
     break;
@@ -138,6 +175,7 @@ BOOL WINAPI DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved
         DetourAttach(&(PVOID&)OldCreateFile, NewCreateFile);
         DetourAttach(&(PVOID&)OldHeapCreate, NewHeapCreate);
         DetourAttach(&(PVOID&)OldHeapDestroy, NewHeapDestroy);
+        DetourAttach(&(PVOID&)OldRegCreateKeyExA, NewRegCreateKeyExA);
         DetourTransactionCommit();
         break;
     }
