@@ -1,0 +1,2 @@
+#define MYDLLMAIN_API __declspec(dllexport)
+#define MYDLLMAIN_API __declspec(dllimport)
